@@ -1,0 +1,116 @@
+user  nginx;
+worker_processes  auto;
+
+error_log  /var/log/nginx/error.log notice;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+ ### Here backendserver is a variable/name of the group of upstream servers
+    upstream backendserver {
+            server 127.0.0.1:3001;
+            server 127.0.0.1:3002;
+    }
+
+### Load BALANCER / Reverse Proxy
+    server {
+            server_name ng.poulav.dev;           
+            location / {
+                    proxy_pass http://backendserver;  # Here the variable sits in that maps the servers mentioned inside the upstream variable.
+            }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/ng.poulav.dev/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/ng.poulav.dev/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+    }
+
+### SERVER 1
+    server {
+    server_name s1.ng.poulav.dev;
+    location / {
+        
+        proxy_pass https://<SERVER_IP>:3001; #The <SERVER_IP> has to be replaced with your original IP of the server that you can find in the dashboard of DigitalOcean.
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+             proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/s1.ng.poulav.dev/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/s1.ng.poulav.dev/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+### SERVER 2
+server {
+    server_name s2.ng.poulav.dev;
+    location / {
+        proxy_pass https://<SERVER_IP>:3002; #The <SERVER_IP> has to be replaced with your original IP of the server that you can find in the dashboard of DigitalOcean.
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/s1.ng.poulav.dev/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/s1.ng.poulav.dev/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+
+    server {
+    if ($host = ng.poulav.dev) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+            listen 80;
+            server_name ng.poulav.dev;
+    return 404; # managed by Certbot
+}
+    server {
+    if ($host = s1.ng.poulav.dev) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    server_name s1.ng.poulav.dev;
+    listen 80;
+    return 404; # managed by Certbot
+}
+server {
+    if ($host = s2.ng.poulav.dev) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    server_name s2.ng.poulav.dev;
+    listen 80;
+    return 404; # managed by Certbot
+}}      
