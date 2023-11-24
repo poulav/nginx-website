@@ -11,10 +11,10 @@ services:
 # Custom Naming for the Networks
 networks:
   webserver1-app-1:
-    name: webserver1
+    name: webserver1_default
     external: true
   webserver2-app-1:
-    name: webserver2
+    name: webserver2_default
     external: true
       
       
