@@ -1,5 +1,5 @@
 ---
-title: "[]{#_s0elmpod1rv8 .anchor}How to Serve a Load Balancer on a
+title: # "How to Serve a Load Balancer on a
   single server using Nginx and simple Python server (Without Using Docker)"
 ---
 
@@ -26,7 +26,7 @@ the web pages.
 #### Acquiring Server and Setting Up Nginx
 
 -   Firstly, purchase a VPS server from
-    > [[DigitalOcean]{.underline}](https://m.do.co/c/37aed4a4d685). You
+    > [DigitalOcean](https://m.do.co/c/37aed4a4d685). You
     > will receive a credit of \$200 as you buy it for the first time.
     > Make sure you have purchased the Ubuntu server as it is best to
     > get you started on your linux journey.
