@@ -1,0 +1,20 @@
+services:
+  proxy:
+    build: ./
+    networks:
+      - webserver1-app-1
+      - webserver2-app-1
+    ports:
+      - 80:80
+      - 443:443
+
+# Custom Naming for the Networks
+networks:
+  webserver1-app-1:
+    name: webserver1
+    external: true
+  webserver2-app-1:
+    name: webserver2
+    external: true
+      
+      
